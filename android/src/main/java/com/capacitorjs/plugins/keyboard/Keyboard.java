@@ -150,6 +150,20 @@ public class Keyboard {
     }
 
     private int computeUsableHeight() {
+        // Use WindowInsets API to get accurate height in edge-to-edge mode
+        WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(rootView);
+        if (insets != null) {
+            int imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+
+            if (imeHeight > 0) {
+                // Keyboard is visible - use screen height minus IME height
+                // The IME inset already accounts for the navigation bar correctly
+                int screenHeight = rootView.getHeight();
+                return screenHeight - imeHeight;
+            }
+        }
+
+        // Fallback to original behavior when keyboard is not visible
         Rect r = new Rect();
         mChildOfContent.getWindowVisibleDisplayFrame(r);
         return isOverlays() ? r.bottom : r.height();
